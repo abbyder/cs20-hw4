@@ -1,0 +1,199 @@
+<!-- 
+    index.html : Calculates the order summary for an order placed to Joe's
+                 Hotdog Stand
+    Abigail Der
+    CS 20
+    Homework 4
+ -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Joe's Hotdog Stand</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="receipt">
+        
+    <h3>Thank you for ordering from</h3>
+    <h1>Joe's Hotdog Stand</h1>
+    <h3>Order Summary</h3>
+
+    <table>
+        <tr>
+            <th class="col-item">Item</th>
+            <th class="col-QTY">QTY</th>
+            <th class="col-subT">Subtotal</th>
+        </tr>
+        <tr id="hotdog-row">
+            <td class="col-item">Hotdog</td>
+            <td class="col-QTY" id="hotdogQTY">1</td>
+            <td class="col-subT" id="hotdogSubtotal">$12.50</td>
+        </tr>
+        <tr id="fries-row">
+            <td class="col-item">Fries</td>
+            <td class="col-QTY" id="friesQTY">2</td>
+            <td class="col-subT" id="friesSubtotal">$2.73</td>
+        </tr>
+        <tr id="drink-row">
+            <td class="col-item">Drink</td>
+            <td class="col-QTY" id="drinkQTY">100</td>
+            <td class="col-subT" id="drinkSubtotal">$200.23</td>
+        </tr>
+
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+
+        <tr>
+            <td>Subtotal</td>
+            <td>&nbsp;</td>
+            <td class="sum-amt" id="subtotal">1</td>
+        </tr>
+        <tr id="discount-row">
+            <td>Discount</td>
+            <td>&nbsp;</td>
+            <td class="sum-amt" id="discount">1</td>
+        </tr>
+        <tr>
+            <td>Tax</td>
+            <td>&nbsp;</td>
+            <td class="sum-amt" id="tax">1</td>
+        </tr>
+
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+
+        <tr class="total-row">
+            <td>Total</td>
+            <td>&nbsp;</td>
+            <td class="sum-amt" id="total">1</td>
+        </tr>
+    </table>
+    </div>
+
+    <script>
+
+        //  round : Rounds a given value to two decimal places if necessary
+        //    arg : x, Value to be rounded
+        // return : Given value rounded to two decimal places
+        function round(x) {
+            var val = x.toString();
+            var i = val.indexOf(".");
+            
+            // within 2 decimal places
+            if ((i == -1) || (i + 1 == val.length - 1) || (i + 2 == val.length - 1)) {
+                return parseFloat(val);
+            }
+
+            var j = i + 3;
+            var round = true;
+
+            // start rounding process if applicable
+            if (val[j] >= 5) {
+                while (round && (j > 0)) {
+                    if (val[j - 1] == ".") {
+                        j--;
+                        continue;
+                    }
+                    var newVal = parseInt(val[j - 1]) + 1;
+
+                    // determines if rounding should continue
+                    if (newVal == 10) {
+                        newVal = 0;
+                    } else {
+                        round = false;
+                    }
+
+                    // updates val with rounded digit
+                    val = val.substring(0, j - 1) + newVal + val.substring(j);
+                    j--;
+                }
+            } else {
+                round = false;
+            }
+
+            // if need to add a leading 1
+            if (round) {
+                val = "1" + val;
+            }
+            
+            // returns only up to two decimal places
+            return parseFloat(val.substring(0, (i + 3)));
+        }
+
+        // displayCurr : Adds trailing zeroes and $ to given value as necessary
+        //        args : x, value to add zeroes to
+        //      return : Given value in proper currency form
+        //        note : Assumes x has been rounded to two decimal places
+        function displayCurr(x) {
+            var val = x.toString();
+            var i = val.indexOf(".");
+            
+            if (i == -1) {
+                val = val + ".00";
+            } else if (i == val.length - 2) {
+                val = val + "0";
+            }
+            return "$" + val;
+        }
+
+        // get order
+        let numHotdogs = prompt("How many hotdogs do you want to order?");
+        let numFries = prompt("How many fries do you want to order?");
+        let numDrinks = prompt("How many drinks do you want to order?");
+
+        if (isNaN(numHotdogs) || isNaN(numFries) || isNaN(numDrinks) ||
+            (numHotdogs < 0) || (numFries < 0) || (numDrinks < 0)) {
+            alert("Invalid input. Please refresh and try again.");
+        }
+        
+        // calculate subtotals
+        let subtotalHotdogs = numHotdogs * 4;
+        let subtotalFries = numFries * 3.5;
+        let subtotalDrinks = numDrinks * 1.75;
+        let subtotal = round(subtotalHotdogs + subtotalFries + subtotalDrinks);
+
+        let discount = 0;
+        let internalSubtotal = subtotal;
+        // check if special offer applies
+        if (subtotal >= 20) {
+            discount = round(subtotal * 0.1);
+            internalSubtotal -= discount;
+        }
+
+        // calculate tax + final payment due
+        let tax = round(internalSubtotal * 0.0625);
+        let finalTotal = round(internalSubtotal + tax);
+
+        // display order summary
+        document.getElementById("hotdogQTY").innerHTML = numHotdogs;
+        document.getElementById("friesQTY").innerHTML = numFries;
+        document.getElementById("drinkQTY").innerHTML = numDrinks;
+        
+        document.getElementById("hotdogSubtotal").innerHTML = displayCurr(subtotalHotdogs);
+        document.getElementById("friesSubtotal").innerHTML = displayCurr(subtotalFries);
+        document.getElementById("drinkSubtotal").innerHTML = displayCurr(subtotalDrinks);
+
+        document.getElementById("subtotal").innerHTML = displayCurr(subtotal);
+        document.getElementById("discount").innerHTML = "&minus;&nbsp;" + displayCurr(discount);
+        document.getElementById("tax").innerHTML = displayCurr(tax);
+        document.getElementById("total").innerHTML = displayCurr(finalTotal);
+
+        // hide elements that aren't applicable to order
+        if (discount == 0) {
+            document.getElementById("discount-row").style.display = "none";
+        }
+        if (numHotdogs <= 0) {
+            document.getElementById("hotdog-row").style.display = "none";
+        }
+        if (numFries <= 0) {
+            document.getElementById("fries-row").style.display = "none";
+        }
+        if (numDrinks <= 0) {
+            document.getElementById("drink-row").style.display = "none";
+        }
+
+    </script>
+
+</body>
+
+</html>
